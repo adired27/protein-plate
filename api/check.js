@@ -95,17 +95,17 @@ export default async function handler(req, res) {
 function buildPrompt(form, note) {
   return `You are checking a person's meal log against a photo of the meal. They say this meal contains:
 - eggs: ${form.eggs} whole eggs (any style: boiled, omelette, bhurji, curry)
-- nuts: ${form.nuts} fistfuls (one fistful is about 30 g of nuts)
+- nuts: ${form.nuts} fistfuls (one fistful is about 30 g; count nuts and seeds together: almonds, cashews, peanuts, walnuts, pistachios, pumpkin, sunflower and similar seeds)
 - chicken: ${form.chicken} grams of cooked edible meat (not bone, skin or gravy)
 ${note ? `Their note: "${note}"\n` : ""}
+Only these three foods matter. Ignore every other food in the photo (dal, sprouts, chana, salad, rice, roti, curd, paneer and so on): do not mention, count or estimate them.
 For EACH of eggs, nuts and chicken, judge whether the photo makes their number reasonable.
 Be fair, not strict: accept anything within roughly 30% of what you see, and accept when food could plausibly be hidden (eggs mixed into bhurji, chicken under gravy, bone-in pieces, a partly cut-off plate). Use the plate (about 26 cm across), katori, spoon or hand for scale.
 Verdicts: "ok" = reasonable; "too_high" = the photo clearly shows much less; "too_low" = the photo clearly shows much more (including when they entered 0 but the food is clearly there); "not_seen" = they entered more than 0 but that food is clearly not in the photo. When they entered 0 and the food is absent, verdict is "ok".
 "estimate" is your own amount in the same unit: a whole number of eggs, fistfuls in steps of 0.5, chicken grams rounded to 10.
-Also list OTHER protein foods clearly visible (dal, paneer, curd, milk, fish, mutton, soya, rajma, chana, tofu, sprouts) with a realistic protein estimate for the portion. Skip rice, roti, bread and vegetables. Thin home dal is about 4-6 g per katori, thick 7-9 g.
 If the photo is not a meal or too unclear to judge, set photo_ok to false and explain in note.
 Reply with only JSON, no other text:
-{"photo_ok":true,"checks":[{"item":"eggs","verdict":"ok","estimate":2,"reason":"short sentence"},{"item":"nuts","verdict":"ok","estimate":0,"reason":""},{"item":"chicken","verdict":"too_high","estimate":90,"reason":"short sentence"}],"others":[{"name":"Dal","portion":"1 katori, thin","protein_g":5}],"note":""}`;
+{"photo_ok":true,"checks":[{"item":"eggs","verdict":"ok","estimate":2,"reason":"short sentence"},{"item":"nuts","verdict":"ok","estimate":0,"reason":""},{"item":"chicken","verdict":"too_high","estimate":90,"reason":"short sentence"}],"note":""}`;
 }
 
 // Turn whatever Claude returned into a strict, safe shape.
@@ -122,12 +122,7 @@ function clean(out, form) {
     };
   }
   for (const k of ITEMS) checks[k] ||= { verdict: "ok", estimate: form[k], reason: "" };
-  const others = (Array.isArray(out.others) ? out.others : []).slice(0, 6).map(o => ({
-    name: String(o?.name || "Food").slice(0, 40),
-    portion: String(o?.portion || "").slice(0, 80),
-    protein: clamp(Number(o?.protein_g) || 0, 0, 80),
-  })).filter(o => o.protein > 0);
-  return { photo_ok: out.photo_ok !== false, note: String(out.note || "").slice(0, 200), checks, others };
+  return { photo_ok: out.photo_ok !== false, note: String(out.note || "").slice(0, 200), checks, others: [] };
 }
 
 function parseJson(text) {
