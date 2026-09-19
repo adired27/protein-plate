@@ -3,6 +3,6 @@
 // and every user can only reach their own rows.
 // Find both in Supabase: Project Settings > API.
 window.PP_CONFIG = {
-  supabaseUrl: "https://YOUR-PROJECT.supabase.co",
-  supabaseAnonKey: "your-anon-or-publishable-key",
+  supabaseUrl: "https://dgwfolngxwrheacjeeik.supabase.co",
+  supabaseAnonKey: "sb_publishable_-knVj4df862BW_c1bG6IiQ_BBuqaFp4",
 };
