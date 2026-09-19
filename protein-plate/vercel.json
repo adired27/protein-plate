@@ -1,5 +1,0 @@
-{
-  "functions": {
-    "api/check.js": { "maxDuration": 60 }
-  }
-}

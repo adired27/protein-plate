@@ -1,6 +1,0 @@
-{
-  "name": "protein-plate",
-  "private": true,
-  "type": "module",
-  "engines": { "node": ">=20" }
-}
