@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#2F6B4A">
+<title>Protein Plate</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F3F5EF; --card:#FFFFFF; --ink:#16241C; --muted:#5B6B61; --line:#D8DED4;
+  --leaf:#2F6B4A; --leaf-ink:#FFFFFF; --haldi:#E3A21A; --haldi-soft:#F6E2B0; --warn:#A8531B; --warn-soft:#FBE7D6;
+  --display:"Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
+  --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#111814; --card:#1A231E; --ink:#E8EEE9; --muted:#9AAAA0; --line:#2C3832;
+    --leaf:#6DBA8E; --leaf-ink:#0E1612; --haldi:#F0B63A; --haldi-soft:#4A3A14; --warn:#F0A070; --warn-soft:#3A2518;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#111814; --card:#1A231E; --ink:#E8EEE9; --muted:#9AAAA0; --line:#2C3832;
+  --leaf:#6DBA8E; --leaf-ink:#0E1612; --haldi:#F0B63A; --haldi-soft:#4A3A14; --warn:#F0A070; --warn-soft:#3A2518;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:1.0625rem;line-height:1.5}
+main{max-width:520px;margin:0 auto;padding:1.25rem 1rem 3rem}
+h1,h2{font-family:var(--display);margin:0;letter-spacing:-.01em}
+h2{font-size:1.25rem;margin-bottom:.75rem}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--haldi);outline-offset:2px}
+.top{display:flex;justify-content:space-between;align-items:baseline;gap:1rem}
+.top h1{font-size:1.5rem}
+.hello{color:var(--muted);font-size:.95rem}
+
+.plate{position:relative;width:min(280px,72vw);aspect-ratio:1;margin:1.25rem auto .5rem}
+.plate svg{width:100%;height:100%;transform:rotate(-90deg)}
+.plate .rim{fill:var(--card);stroke:var(--line);stroke-width:2}
+.plate .track{fill:none;stroke:var(--haldi-soft);stroke-width:16}
+.plate .fill{fill:none;stroke:var(--haldi);stroke-width:16;stroke-linecap:round;transition:stroke-dashoffset .6s ease}
+.plate.done .fill{stroke:var(--leaf)}
+.center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.grams{font-family:var(--display);font-weight:800;font-size:clamp(3rem,14vw,4.25rem);line-height:1}
+.grams small{font-size:.4em;font-weight:600;margin-left:.1em}
+.of{color:var(--muted);margin-top:.25rem}
+.of button{background:none;border:none;padding:0;text-decoration:underline;text-underline-offset:3px;color:var(--muted)}
+.status{text-align:center;color:var(--muted);min-height:1.5em;margin-bottom:1.75rem}
+
+/* log form */
+.log{background:var(--card);border:1.5px solid var(--line);border-radius:22px;padding:1rem;margin-bottom:2rem}
+.shot{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.4rem;width:100%;min-height:150px;border:2px dashed var(--line);border-radius:16px;background:var(--bg);padding:1rem;color:var(--muted);overflow:hidden}
+.shot svg{width:2.2rem;height:2.2rem;color:var(--leaf)}
+.shot strong{color:var(--ink);font-family:var(--display);font-weight:600;font-size:1.15rem}
+.shot.has{padding:0;border-style:solid;min-height:0}
+.shot img{display:block;width:100%;max-height:240px;object-fit:cover}
+.retake{display:block;margin:.4rem auto 0;background:none;border:none;color:var(--muted);text-decoration:underline;text-underline-offset:3px;font-size:.95rem}
+.field{display:flex;align-items:center;justify-content:space-between;gap:.75rem;padding:.85rem 0;border-bottom:1px solid var(--line)}
+.field:last-of-type{border-bottom:none}
+.field .lab{font-weight:700}
+.field .sub{display:block;font-weight:400;color:var(--muted);font-size:.88rem}
+.stepper{display:flex;align-items:center;gap:.4rem}
+.stepper button{width:2.6rem;height:2.6rem;border-radius:50%;border:1.5px solid var(--line);background:var(--bg);font-size:1.25rem;line-height:1}
+.stepper output{min-width:2.4rem;text-align:center;font-family:var(--display);font-weight:600;font-size:1.3rem}
+.gramsIn{display:flex;align-items:center;gap:.35rem}
+.gramsIn input{width:5.5rem;padding:.55rem .6rem;border:1.5px solid var(--line);border-radius:12px;background:var(--bg);text-align:right;font-family:var(--display);font-weight:600;font-size:1.2rem}
+.presets{display:flex;gap:.4rem;flex-wrap:wrap;margin:-.35rem 0 .6rem}
+.presets button{border:1.5px solid var(--line);background:var(--bg);border-radius:999px;padding:.3rem .75rem;font-size:.92rem}
+.note{width:100%;margin-top:.75rem;padding:.7rem .8rem;border:1.5px solid var(--line);border-radius:12px;background:var(--bg)}
+.go{width:100%;margin-top:1rem;padding:1rem;border:none;border-radius:999px;background:var(--leaf);color:var(--leaf-ink);font-family:var(--display);font-weight:600;font-size:1.2rem}
+.go:disabled{opacity:.45;cursor:default}
+.why{font-size:.9rem;color:var(--muted);text-align:center;margin:.5rem 0 0}
+
+/* verdict */
+.result{margin-top:1rem;border-top:1.5px solid var(--line);padding-top:.75rem}
+.check{display:grid;grid-template-columns:1.6rem 1fr auto;gap:.1rem .5rem;padding:.6rem 0;align-items:start}
+.check .mark{font-weight:800;font-size:1.1rem;line-height:1.5}
+.check.ok .mark{color:var(--leaf)}
+.check.bad{background:var(--warn-soft);border-radius:12px;padding:.6rem .6rem;margin:.3rem -.6rem}
+.check.bad .mark{color:var(--warn)}
+.check .reason{grid-column:2/-1;color:var(--muted);font-size:.92rem}
+.check .g{font-family:var(--display);font-weight:600}
+.useai{grid-column:2/-1;justify-self:start;margin-top:.35rem;border:1.5px solid var(--warn);color:var(--warn);background:transparent;border-radius:999px;padding:.35rem .85rem;font-weight:700;font-size:.95rem}
+.others{margin-top:.25rem}
+.small{font-size:.92rem;color:var(--muted)}
+.row{display:flex;gap:.6rem;margin-top:.9rem}
+.btn{flex:1;padding:.85rem;border-radius:999px;border:1.5px solid var(--line);background:var(--card);font-weight:700}
+.btn.primary{background:var(--leaf);border-color:var(--leaf);color:var(--leaf-ink)}
+.btn:disabled{opacity:.45;cursor:default}
+
+.meals{list-style:none;margin:0 0 2rem;padding:0}
+.meals li{display:flex;align-items:center;gap:.75rem;padding:.75rem 0;border-bottom:1px solid var(--line)}
+.meals .what{flex:1;min-width:0}
+.meals .g{font-family:var(--display);font-weight:600;font-size:1.15rem}
+.count{font-family:var(--display);font-weight:600;color:var(--leaf);margin-left:.35rem}
+.del{border:none;background:none;color:var(--muted);font-size:1.4rem;padding:.25rem .5rem;border-radius:8px}
+.empty{color:var(--muted);padding:.5rem 0 1.5rem}
+
+.bars{position:relative;display:grid;grid-template-columns:repeat(14,1fr);gap:4px;align-items:end;height:130px;padding-top:.5rem;border-bottom:1.5px solid var(--line)}
+.bar{background:var(--haldi-soft);border-radius:5px 5px 0 0;min-height:2px}
+.bar.hit{background:var(--leaf)}
+.bar.today{outline:2px solid var(--haldi);outline-offset:1px}
+.goal{position:absolute;left:0;right:0;border-top:1.5px dashed var(--muted);pointer-events:none}
+.days{display:grid;grid-template-columns:repeat(14,1fr);gap:4px;font-size:.72rem;color:var(--muted);text-align:center;margin-top:.3rem}
+.avg{margin:.75rem 0 0;color:var(--muted)}
+.foot{margin-top:2.5rem;font-size:.85rem;color:var(--muted);text-align:center}
+.toast{position:fixed;left:50%;bottom:1.25rem;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:.7rem 1.1rem;border-radius:12px;max-width:90vw;font-size:.95rem;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast.show{opacity:1}
+@media (prefers-reduced-motion: reduce){ .plate .fill,.toast{transition:none} }
+[hidden]{display:none!important}
+
+.signin{min-height:80vh;display:flex;flex-direction:column;justify-content:center;gap:1rem;text-align:center}
+.signin h1{font-size:clamp(2.4rem,11vw,3.4rem);font-weight:800;line-height:1.05}
+.signin p{color:var(--muted);max-width:30ch;margin:0 auto}
+.google{display:inline-flex;align-items:center;justify-content:center;gap:.7rem;margin:1rem auto 0;padding:.95rem 1.5rem;border-radius:999px;border:1.5px solid var(--line);background:var(--card);font-weight:700;font-size:1.1rem}
+.google svg{width:1.3rem;height:1.3rem}
+.linkbtn{background:none;border:none;color:var(--muted);text-decoration:underline;text-underline-offset:3px;font-size:.85rem;padding:0}
+.left{font-size:.9rem;color:var(--muted);text-align:center;margin:.5rem 0 0}
+</style>
+</head>
+<body>
+
+<main id="signin" class="signin" hidden>
+  <h1>Protein Plate</h1>
+  <p>Photo your plate, enter what you ate, and see how much real protein you get each day.</p>
+  <button class="google" id="googleBtn">
+    <svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.6 5.4 2.7 13.2l7.9 6.2C12.5 13.6 17.8 9.5 24 9.5z"/><path fill="#4285F4" d="M46.1 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.4c-.5 2.9-2.2 5.3-4.6 6.9l7.4 5.7c4.3-4 6.9-9.9 6.9-17.1z"/><path fill="#FBBC05" d="M10.6 28.6A14.5 14.5 0 0 1 9.5 24c0-1.6.3-3.2.8-4.6l-7.9-6.2A24 24 0 0 0 0 24c0 3.9.9 7.5 2.7 10.8l7.9-6.2z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.4-5.7c-2.1 1.4-4.8 2.3-8.5 2.3-6.2 0-11.5-4.1-13.4-9.9l-7.9 6.2C6.6 42.6 14.6 48 24 48z"/></svg>
+    Continue with Google
+  </button>
+  <p class="small" id="signinMsg"></p>
+</main>
+
+<main id="app" hidden>
+  <div class="top">
+    <h1>Protein today</h1>
+    <span class="small" id="hello"></span>
+  </div>
+
+  <div class="plate" id="plate" aria-live="polite">
+    <svg viewBox="0 0 200 200" aria-hidden="true">
+      <circle class="rim" cx="100" cy="100" r="98"/>
+      <circle class="track" cx="100" cy="100" r="80"/>
+      <circle class="fill" id="ringFill" cx="100" cy="100" r="80" stroke-dasharray="502.65" stroke-dashoffset="502.65"/>
+    </svg>
+    <div class="center">
+      <div class="grams"><span id="total">0</span><small>g</small></div>
+      <div class="of">of <button id="targetBtn" aria-label="Change daily target"><span id="target">60</span> g goal</button></div>
+    </div>
+  </div>
+  <p class="status" id="status"></p>
+
+  <section class="log" aria-labelledby="logTitle">
+    <h2 id="logTitle">Log a meal</h2>
+    <input type="file" id="file" accept="image/*" hidden>
+    <button class="shot" id="shot" aria-label="Take or choose a photo of your meal"></button>
+    <button class="retake" id="retake" hidden>Retake photo</button>
+
+    <div class="field">
+      <span class="lab">Eggs<span class="sub">Whole eggs, any style</span></span>
+      <span class="stepper" data-k="eggs" data-step="1"><button aria-label="Fewer eggs" data-d="-1">−</button><output id="v-eggs">0</output><button aria-label="More eggs" data-d="1">+</button></span>
+    </div>
+    <div class="field">
+      <span class="lab">Nuts<span class="sub">Fistfuls</span></span>
+      <span class="stepper" data-k="nuts" data-step="0.5"><button aria-label="Fewer fistfuls of nuts" data-d="-1">−</button><output id="v-nuts">0</output><button aria-label="More fistfuls of nuts" data-d="1">+</button></span>
+    </div>
+    <div class="field">
+      <span class="lab">Chicken<span class="sub">Cooked meat, no bone</span></span>
+      <span class="gramsIn"><input id="v-chicken" type="number" inputmode="numeric" min="0" max="1000" step="10" value="0" aria-label="Chicken in grams"><span>g</span></span>
+    </div>
+    <div class="presets" id="presets">
+      <button data-g="50">50 g</button><button data-g="100">100 g</button><button data-g="150">150 g</button><button data-g="200">200 g</button>
+    </div>
+    <p class="small" style="margin:0">A palm-sized boneless piece is about 100 g.</p>
+
+    <input class="note" id="note" maxlength="300" placeholder="Anything the photo can't show? (optional)" aria-label="Note about the meal">
+    <button class="go" id="go" disabled>Check and add</button>
+    <p class="why" id="why">Add a photo to continue.</p>
+    <p class="left" id="left" hidden></p>
+
+    <div class="result" id="result" hidden aria-live="polite"></div>
+  </section>
+
+  <h2>Eaten today</h2>
+  <ul class="meals" id="meals"></ul>
+
+  <h2>Last 14 days</h2>
+  <div class="bars" id="bars"><div class="goal" id="goal"></div></div>
+  <div class="days" id="days"></div>
+  <p class="avg" id="avg"></p>
+
+  <p class="foot">Saved to your account. <button class="linkbtn" id="signout">Sign out</button></p>
+</main>
+<div class="toast" id="toast" role="status"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
